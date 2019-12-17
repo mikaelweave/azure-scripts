@@ -1,6 +1,6 @@
 # ADF Storage Move
 
-Terraform script to move files from one blob to another
+Terraform script to create Data Factory to move files from one blob container to another blob container.
 
 Example Commands:
 ```

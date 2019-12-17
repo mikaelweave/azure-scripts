@@ -196,7 +196,7 @@
                 "typeProperties": {
                     "location": {
                         "type": "AzureBlobStorageLocation",
-                        "container": "[parameters('srcContainerName']"
+                        "container": "[parameters('srcContainerName')]"
                     }
                 }
             },
@@ -231,7 +231,7 @@
                 "typeProperties": {
                     "location": {
                         "type": "AzureBlobStorageLocation",
-                        "container": "[parameters('destContainerName']"
+                        "container": "[parameters('destContainerName')]"
                     }
                 }
             },

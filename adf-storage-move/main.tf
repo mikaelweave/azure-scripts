@@ -1,5 +1,5 @@
 provider "azurerm" {
-  version = "~>1.39.0"
+  version = "=1.38.0"
 }
 data "azurerm_subscription" "current" {}
 
@@ -47,6 +47,7 @@ resource "azurerm_storage_account" "source" {
 
 resource "azurerm_storage_container" "source_container" {
   name                  = var.sourceContainerName
+  resource_group_name      = azurerm_resource_group.main.name
   storage_account_name  = azurerm_storage_account.source.name
   container_access_type = "private"
 }
@@ -61,6 +62,7 @@ resource "azurerm_storage_account" "dest" {
 
 resource "azurerm_storage_container" "dest_container" {
   name                  = var.destContainerName
+  resource_group_name      = azurerm_resource_group.main.name
   storage_account_name  = azurerm_storage_account.dest.name
   container_access_type = "private"
 }
@@ -95,7 +97,7 @@ resource "azurerm_template_deployment" "data-factory-dependencies" {
   parameters = {
     "factoryName" = var.factoryName,
     "blobSourceAccountUrl" = "https://${azurerm_storage_account.source.name}.blob.core.windows.net/",
-    "blobDestAccountUrl" = "https://${azurerm_storage_account.dest.name}.blob.core.windows.net/".
+    "blobDestAccountUrl" = "https://${azurerm_storage_account.dest.name}.blob.core.windows.net/",
     "srcContainerName" = var.sourceContainerName,
     "destContainerName" = var.destContainerName
   }
