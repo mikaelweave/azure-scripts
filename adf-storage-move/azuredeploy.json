@@ -10,6 +10,13 @@
         },
         "blobDestAccountUrl": {
             "type": "string"
+        },
+        "srcContainerName": {
+            "type": "string"
+        }
+        ,
+        "destContainerName": {
+            "type": "string"
         }
     },
     "variables": {
@@ -189,7 +196,7 @@
                 "typeProperties": {
                     "location": {
                         "type": "AzureBlobStorageLocation",
-                        "container": "stor"
+                        "container": "[parameters('srcContainerName']"
                     }
                 }
             },
@@ -224,7 +231,7 @@
                 "typeProperties": {
                     "location": {
                         "type": "AzureBlobStorageLocation",
-                        "container": "dest"
+                        "container": "[parameters('destContainerName']"
                     }
                 }
             },
