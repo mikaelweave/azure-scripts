@@ -1,0 +1,7 @@
+# Terraform plan file
+plan
+
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+versions.tf
