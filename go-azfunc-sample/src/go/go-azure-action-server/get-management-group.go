@@ -41,7 +41,15 @@ func getManagementGroup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err == nil {
-		group, err := managementClient.Get(ctx, managementGroupID, "", nil, "", "")
+		recurse := new(bool)
+		*recurse = true
+		group, err := managementClient.Get(ctx, managementGroupID, "children", recurse, "", "")
+
+		var childrenArray []interface{}
+		for _, v := range *group.Children {
+			childrenArray = append(childrenArray, v)
+		}
+		outputs["Children"] = childrenArray
 
 		if err == nil {
 			outputs["Data"] = group
@@ -49,6 +57,16 @@ func getManagementGroup(w http.ResponseWriter, r *http.Request) {
 			invokeResponse = InvokeResponse{outputs, []string{"Management group get succeeded"}, http.StatusOK}
 		} else {
 			invokeResponse = InvokeResponse{outputs, []string{err.Error()}, http.StatusInternalServerError}
+		}
+
+		descentantResult, err := managementClient.GetDescendants(ctx, managementGroupID)
+		if err == nil {
+			var descendants []interface{}
+			for _, v := range *descentantResult.Response().Value {
+				descendants = append(descendants, v)
+			}
+
+			outputs["Descendants"] = descendants
 		}
 	} else {
 		invokeResponse = InvokeResponse{outputs, []string{err.Error()}, http.StatusInternalServerError}
