@@ -8,6 +8,6 @@ go build ./go/go-azure-action-server
 cd $SCRIPT_DIR
 
 # Build function app
-cd ${SCRIPT_DIR}/../src
-func pack
-cd $SCRIPT_DIR
+#cd ${SCRIPT_DIR}/../src
+#func pack
+#cd $SCRIPT_DIR

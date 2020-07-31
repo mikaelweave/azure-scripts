@@ -52,4 +52,5 @@ else
 fi
 
 # Deploys function app
-az functionapp deployment source config-zip --name "${BASE_NAME}-fa" --resource-group="${BASE_NAME}-rg" --src ${SCRIPT_DIR}/../src/src.zip
+cd "${SCRIPT_DIR}/../src"
+func azure functionapp publish "${BASE_NAME}-fa" --no-build --force

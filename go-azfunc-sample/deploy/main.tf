@@ -19,12 +19,19 @@ resource "azurerm_app_service_plan" "func_plan" {
   name                = "${var.base_name}-fp"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-  kind                = "FunctionApp"
+  kind                = "Linux"
   reserved            = true
 
   sku {
     tier = "Dynamic"
     size = "Y1"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      # Ingore because deploying FunctionApp will change it from linux to FunctionApp. Therr is a TF bug with FunctionApp and Linux.
+      kind
+    ]
   }
 }
 

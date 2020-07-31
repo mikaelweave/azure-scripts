@@ -26,7 +26,7 @@ The Go code for this sample is located in `src/go`. Pay careful attention to the
 
 ## Resources
 
-- [Azure docs on Function Custom Handlers](https://docs.microsoft.com/en-us/azure/azure-functions/functions-custom-handlers#response-payload)
+- [Azure docs on Function Custom Handlers](https://docs.microsoft.com/en-us/azure/azure-functions/functions-custom-handlers)
 - [Azure Function Custom Handler Blog by David Moore](https://itnext.io/write-azure-functions-in-any-language-with-the-http-worker-34d01f522bfd)
 - [Sample Azure Function with Custom Handler](https://github.com/damoodamoo/azure-func-go-java)
 - [Azure Functions Bindings and Schemas](https://itnext.io/azure-functions-http-worker-bindings-and-schemas-f32f126a3654)
