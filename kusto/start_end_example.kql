@@ -1,0 +1,30 @@
+let T = datatable(id:string, lastModifiedOn:datetime, status:string)
+[
+    '0', datetime(2020-08-09 05:32:00), 'Status1',
+    '0', datetime(2020-08-12 02:34:00), 'Status2',
+    '1', datetime(2020-08-08 17:22:00), 'Status2',
+    '1', datetime(2020-08-10 12:22:00), 'Status1',
+];
+
+
+let TStartEnd = materialize(
+T
+| extend Start=lastModifiedOn, id, status
+| join kind=inner
+    (
+        T
+        | extend End=lastModifiedOn
+    ) on id
+| project id, Start, End = case(End < Start, now(), End), status
+| extend TimeKey = range(Start, End, 1d) // this is wrong?
+| where Start < End);
+
+range LastWeek from ago(7d) to now() step 1d
+| project TimeKey = format_datetime(startofday(LastWeek), "yyyy-MM-dd")
+| join kind=inner (TStartEnd
+    | where End >ago(7d)
+    | mv-expand TimeKey
+    | project id, status, TimeKey=format_datetime(todatetime(TimeKey), "yyyy-MM-dd")
+) on TimeKey
+| summarize Count = count() by TimeKey, status
+| sort by TimeKey desc
