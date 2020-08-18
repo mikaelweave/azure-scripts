@@ -16,6 +16,7 @@ func main() {
 	mux.HandleFunc("/getResourcesTags", getResourcesTags)
 	mux.HandleFunc("/getResourceGroups", getResourceGroups)
 	mux.HandleFunc("/getManagementGroup", getManagementGroup)
+	mux.HandleFunc("/timerTest", timerTest)
 	log.Println("Go server Listening...on httpInvokerPort:", httpInvokerPort)
 	log.Fatal(http.ListenAndServe(":"+httpInvokerPort, mux))
 }

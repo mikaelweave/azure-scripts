@@ -6,9 +6,9 @@
     },
     "httpWorker": {
       "description": {
-        "defaultExecutablePath": "${GOPATH}/bin/dlv debug",
+        "defaultExecutablePath": "${GOPATH}/bin/dlv",
         "defaultWorkerPath": "go/go-azure-action-server",
-        "arguments": ["--listen=:40000", "--headless=true", "--api-version=2", "--log"]
+        "arguments": ["debug", "--listen=:40000", "--headless=true", "--api-version=2", "--log"]
 
       }
     }
