@@ -6,6 +6,14 @@ set -euo pipefail
 # -u: unset variables cause script exit and error
 
 
+# Ensure jq is installed
+if ! command -v jq &> /dev/null
+then
+    printf "\033[0;31m jq could not be found. jq must be installed for this script.\033[0m\n"
+    exit
+fi
+
+
 PRIVATE_SP_NAME="fhir-proxy-private-client"
 PUBLIC_SP_NAME="fhir-proxy-public-client"
 
