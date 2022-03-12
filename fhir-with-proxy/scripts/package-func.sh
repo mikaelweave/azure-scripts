@@ -13,9 +13,19 @@ if [[ -f "${FUNC_CODE_DIR}/publish" ]]; then
     rm -rf ${FUNC_CODE_DIR}/publish
 fi
 
-if [[ -f "${FUNC_CODE_DIR}/publish.zip" ]]; then
-    rm -f ${FUNC_CODE_DIR}/publish.zip
+if [ -z "$2" ]
+then
+    ZIP_PATH="${FUNC_CODE_DIR}/publish.zip"
+else
+    ZIP_PATH=$2
+fi
+
+if [[ -f "$ZIP_PATH" ]]; then
+    rm -f $ZIP_PATH
 fi
 
 dotnet build ${FUNC_CODE_DIR}/*.csproj --output ${FUNC_CODE_DIR}/publish --configuration release
-zip -r ${FUNC_CODE_DIR}/publish.zip ${FUNC_CODE_DIR}/publish/*
+
+cd ${FUNC_CODE_DIR}/publish
+zip -r $ZIP_PATH *
+cd -

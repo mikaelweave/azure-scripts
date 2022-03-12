@@ -24,19 +24,24 @@ deploy: deploy-infra deploy-func
 ## Create only the azure resources
 .PHONY: deploy-infra
 deploy-infra:
-	az group create --name $(RESOURCE_GROUP) --location $(LOCATION) --output table
-	az deployment group create --resource-group $(RESOURCE_GROUP) --template-file main.bicep --output table
+	./scripts/deploy-infra-and-sps.sh
 
 ## Deploy only the Function App. Depends on `deploy-infra` being run first.
 .PHONY: deploy-func
 deploy-func:
-	export FUNCTION_APP_NAME=`az deployment group show -g ${RESOURCE_GROUP} -n main --query properties.outputs.functionAppName.value --output tsv`
-	az functionapp deployment source config-zip -g ${RESOURCE_GROUP} -n ${FUNCTION_APP_NAME} --src ${FUNCTION_CODE}
+	./scripts/deploy-proxy-func.sh
+	
+## Generates a Postman environment for use in testing proxy
+.PHONY: gen-postman-env
+gen-postman-env:
+	./scripts/create-postman-env.sh
 
 ## Remove the resource group and resources
 .PHONY: destroy
 destroy:
 	az group delete --resource-group ${RESOURCE_GROUP}
+	unset PUBLIC_SP
+	unset PRIVATE_SP
 
 
 ## Show the help

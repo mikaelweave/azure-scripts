@@ -1,0 +1,55 @@
+{
+    "id": "~guid~",
+    "name": "~envname~",
+    "values": [
+        {
+            "key": "fhirUrl",
+            "value": "~fhirurl~",
+            "enabled": true
+        },
+        {
+            "key": "tenantId",
+            "value": "~tenentid~",
+            "enabled": true
+        },
+        {
+            "key": "fhirClientId",
+            "value": "~fhirClientId~",
+            "enabled": true
+        },
+        {
+            "key": "fhirClientSecret",
+            "value": "~fhirClientSecret~",
+            "type": "secret",
+            "enabled": true
+        },
+        {
+            "key": "resource",
+            "value": "~resource~",
+            "enabled": true
+        },
+        {
+            "key": "proxyHost",
+            "value": "~proxyHost~",
+            "enabled": true
+        },
+        {
+            "key": "proxyClientId",
+            "value": "~proxyClientId~",
+            "enabled": true
+        },
+        {
+            "key": "proxyClientSecret",
+            "value": "~proxyClientSecret~",
+            "type": "secret",
+            "enabled": true
+        },
+        {
+            "key": "proxyResource",
+            "value": "~proxyResource~",
+            "enabled": true
+        }
+    ],
+    "_postman_variable_scope": "environment",
+    "_postman_exported_using": "Postman/8.0.6"
+}
