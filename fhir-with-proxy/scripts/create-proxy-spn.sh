@@ -29,11 +29,12 @@ function createServicePrincipal()
 
     SP=`az ad sp create-for-rbac --name $1 --only-show-errors --output json`
     APP_ID=`echo $SP | jq -r '.appId'`
-    OBJECT_ID=`az ad sp show --id $APP_ID --query "objectId" --out tsv`
+    OBJECT_ID=`az ad app show --id $APP_ID --query "objectId" --out tsv`
+    ENTERPRISE_OBJECT_ID=`az ad sp show --id $APP_ID --query "objectId" --out tsv`
     TENANT_ID=`echo $SP | jq -r '.tenant'`
     SECRET=`echo $SP | jq -r '.password'`
 
-    echo $SP | jq --arg objectId $OBJECT_ID '. + {objectId: $objectId}'
+    echo $SP | jq --arg objectId $OBJECT_ID '. + {objectId: $objectId}' | jq --arg objectId $ENTERPRISE_OBJECT_ID '. + {enterpriseObjectId: $objectId}'
 }
 
 createServicePrincipal "$SP_NAME" "SP_APP_ID" "SP_OBJECT_ID" "SP_TENAET_ID" "SP_SECRET"

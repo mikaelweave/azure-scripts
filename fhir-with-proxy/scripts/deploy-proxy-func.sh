@@ -71,5 +71,5 @@ FUNCTION_APP_NAME=`az deployment group show -g ${RESOURCE_GROUP} \
                    -n main --query properties.outputs.functionAppName.value \
                    --output tsv`
 
-#deployFromRepo "$RESOURCE_GROUP" "$FUNCTION_APP_NAME" "https://github.com/microsoft/fhir-proxy"
+downloadAndExtractZip "https://github.com/microsoft/fhir-proxy/archive/refs/heads/main.zip"
 deployFromLocal "$RESOURCE_GROUP" "$FUNCTION_APP_NAME" "${REPO_DIR}/tmp/fhir-proxy-main/FHIRProxy"

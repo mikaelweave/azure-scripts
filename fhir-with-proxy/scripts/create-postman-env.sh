@@ -5,19 +5,27 @@ set -euo pipefail
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 REPO_DIR="${SCRIPT_DIR}/.."
 
+# Load from .env file from repo root
+if [ -f "${REPO_DIR}/.env" ]
+then
+  set -a
+  export $(cat "${REPO_DIR}/.env" | sed -e '/^#/d;/^\s*$/d' -e "s/'/'\\\''/g" -e "s/=\(.*\)/='\1'/g" | xargs)
+  set +a
+fi
+
+# Ensure the azure cli is logged in
+if ! az account show &> /dev/null
+then
+    echo -e "\033[0;31m You must login to the azure cli before running this script.\033[0m\n"
+    exit
+fi
+
+GROUP_UNIQUE_STR=`az group show --name $RESOURCE_GROUP --query id --output tsv | md5sum | cut -c1-5`
+VAULT_NAME="${PREFIX}-${GROUP_UNIQUE_STR}-kv"
+
 # Create Postman Environment for FHIR Proxy --- Author Steve Ordahl Principal Architect Health Data Platform
 
 # FROM https://raw.githubusercontent.com/microsoft/fhir-proxy/main/scripts/createpostmanproxyenv.bash#
-
-usage() {
-  echo "Usage: $0 -k <keyvault>" 1>&2
-  exit 1
-}
-
-function fail {
-  echo $1 >&2
-  exit 1
-}
 
 function retry {
   local n=1
@@ -47,40 +55,11 @@ function getVaultSecret() {
   az keyvault secret show --vault-name $1 --name $2 --query "value" --out tsv
 }
 
-
-# Initialize parameters specified from command line
-while getopts ":k:n:sp" arg; do
-  case "${arg}" in
-  k)
-    kvname=${OPTARG}
-    ;;
-  esac
-done
-shift $((OPTIND - 1))
-echo "Executing "$0"..."
-
-# Ensure the azure cli is logged in
-if ! az account show &> /dev/null
-then
-    echo -e "\033[0;31m You must login to the azure cli before running this script.\033[0m\n"
-    exit
-fi
-
-#Prompt for parameters is some required parameters are missing
-if [[ -z "$kvname" ]]; then
-  echo "Enter keyvault name that contains the fhir proxy configuration: "
-  read kvname
-fi
-if [ -z "$kvname" ]; then
-  echo "Keyvault name must be specified"
-  usage
-fi
-
 #Check KV exists
-echo "Checking for keyvault "$kvname"..."
-kvexists=$(az keyvault list --query "[?name == '$kvname'].name" --out tsv)
+echo "Checking for keyvault "$VAULT_NAME"..."
+kvexists=$(az keyvault list --query "[?name == '$VAULT_NAME'].name" --out tsv)
 if [[ -z "$kvexists" ]]; then
-  echo "Cannot Locate Key Vault "$kvname" this deployment requires access to the proxy keyvault...Is the Proxy Installed?"
+  echo "Cannot Locate Key Vault "$VAULT_NAME" this deployment requires access to the proxy keyvault...Is the Proxy Installed?"
   exit 1
 fi
 set +e
@@ -88,18 +67,22 @@ set +e
 #Start deployment
 echo "Creating Postman environment for FHIR Proxy..."
 (
-  echo "Loading configuration settings from key vault "$kvname"..."
-  FHIR_URL=`getVaultSecret $kvname "FS-URL"`
-  TENANT=`getVaultSecret $kvname "FS-TENANT-NAME"`
-  FHIR_CLIENT_ID=`getVaultSecret $kvname "FS-CLIENT-ID"`
-  FHIR_CLIENT_SECRET=`getVaultSecret $kvname "FS-CLIENT-SECRET"`
-  PROXY_HOST=`getVaultSecret $kvname "FP-HOST"`
-  PROXY_CLIENT_ID=`getVaultSecret $kvname "FP-SC-CLIENT-ID"`
-  PROXY_CLIENT_SECRET=`getVaultSecret $kvname "FP-SC-SECRET"`
-  PROXY_RESOURCE=`getVaultSecret $kvname "FP-RBAC-CLIENT-ID"`
+  echo "Loading configuration settings from key vault "$VAULT_NAME"..."
+  FhirServerUrl=`getVaultSecret $VAULT_NAME "FS-URL"`
+  FhirServerTenantId=`getVaultSecret $VAULT_NAME "FS-TENANT-NAME"`
+  FhirServerClientId=`getVaultSecret $VAULT_NAME "FS-CLIENT-ID"`
+  FhirServerClientSecret=`getVaultSecret $VAULT_NAME "FS-CLIENT-SECRET"`
+  ProxyFunctionUrl=`getVaultSecret $VAULT_NAME "FP-HOST"`
+  ProxyFunctionName=`echo $ProxyFunctionUrl| cut -d. -f1`
+
+  FunctionAppClientId=`getVaultSecret $VAULT_NAME "FP-RBAC-CLIENT-ID"`
+  FunctionAppClientSecret=`getVaultSecret $VAULT_NAME "FP-RBAC-CLIENT-SECRET"`
+
+  PublicClientId=`getVaultSecret $VAULT_NAME "FP-SC-CLIENT-ID"`
+  PublicClientSecret=`getVaultSecret $VAULT_NAME "FP-SC-SECRET"`
   
-  if [ -z "$FHIR_CLIENT_ID" ] || [ -z "$PROXY_CLIENT_ID" ]; then
-    echo $kvname" does not appear to contain fhir proxy settings...Is the Proxy Installed?"
+  if [ -z "$FhirServerClientId" ] || [ -z "$FunctionAppClientId" ]; then
+    echo $VAULT_NAME" does not appear to contain fhir proxy settings...Is the Proxy Installed?"
     exit 1
   fi
 
@@ -107,21 +90,18 @@ echo "Creating Postman environment for FHIR Proxy..."
 
   pmuuid=$(uuid)
   pmenv=$(<${SCRIPT_DIR}/postman-template.json)
-  pmscope="https://"$PROXY_HOST"/.default"
-  pmfhirurl="https://"$PROXY_HOST"/fhir"
-  pmstsurl="https://"$PROXY_HOST"/AadSmartOnFhirProxy"
   pmenv=${pmenv/~guid~/$pmuuid}
-  pmenv=${pmenv/~envname~/$PROXY_HOST}
+  pmenv=${pmenv/~envname~/$ProxyFunctionUrl}
+  pmenv=${pmenv/~fhirurl~/$FhirServerUrl}
+  pmenv=${pmenv/~tenentid~/$FhirServerTenantId}
+  pmenv=${pmenv/~fhirClientId~/$FhirServerClientId}
+  pmenv=${pmenv/~fhirClientSecret~/$FhirServerClientSecret}
+  pmenv=${pmenv/~resource~/$FhirServerUrl}
+  pmenv=${pmenv/~proxyFunctionUrl~/$ProxyFunctionUrl}
+  pmenv=${pmenv/~functionClientId~/$FunctionAppClientId}
+  pmenv=${pmenv/~functionClientSecret~/$FunctionAppClientSecret}
+  pmenv=${pmenv/~publicClientId~/$PublicClientId}
+  pmenv=${pmenv/~publicClientSecret~/$PublicClientSecret}
 
-  pmenv=${pmenv/~fhirurl~/$FHIR_URL}
-  pmenv=${pmenv/~tenentid~/$TENANT}
-  pmenv=${pmenv/~fhirClientId~/$FHIR_CLIENT_ID}
-  pmenv=${pmenv/~fhirClientSecret~/$FHIR_CLIENT_SECRET}
-  pmenv=${pmenv/~resource~/$FHIR_URL}
-  pmenv=${pmenv/~proxyHost~/$PROXY_HOST}
-  pmenv=${pmenv/~proxyClientId~/$PROXY_CLIENT_ID}
-  pmenv=${pmenv/~proxyClientSecret~/$PROXY_CLIENT_SECRET}
-  pmenv=${pmenv/~proxyResource~/$PROXY_RESOURCE}
-
-  echo $pmenv > "${REPO_DIR}/${PROXY_HOST}.postman_environment.json"
+  echo $pmenv > "${REPO_DIR}/${ProxyFunctionName}.postman_environment.json"
 )

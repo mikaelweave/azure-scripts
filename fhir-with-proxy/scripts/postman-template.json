@@ -29,24 +29,30 @@
             "enabled": true
         },
         {
-            "key": "proxyHost",
-            "value": "~proxyHost~",
+            "key": "proxyFunctionUrl",
+            "value": "~proxyFunctionUrl~",
             "enabled": true
         },
         {
-            "key": "proxyClientId",
-            "value": "~proxyClientId~",
+            "key": "functionClientId",
+            "value": "~functionClientId~",
             "enabled": true
         },
         {
-            "key": "proxyClientSecret",
-            "value": "~proxyClientSecret~",
+            "key": "functionClientSecret",
+            "value": "~functionClientSecret~",
             "type": "secret",
             "enabled": true
         },
         {
-            "key": "proxyResource",
-            "value": "~proxyResource~",
+            "key": "publicClientId",
+            "value": "~publicClientId~",
+            "enabled": true
+        },
+        {
+            "key": "publicClientSecret",
+            "value": "~publicClientSecret~",
+            "type": "secret",
             "enabled": true
         }
     ],

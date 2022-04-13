@@ -1,4 +1,5 @@
 param groupUniqueString string
+param prefix string
 param tenantId string = subscription().tenantId
 param location string = resourceGroup().location
 param adminPrincipalIds array = []
@@ -7,7 +8,7 @@ param publicServicePrincipal object
 param functionServicePrincipal object
 
 // Resource names
-var name = 'fhir-with-proxy-${groupUniqueString}'
+var name = '${prefix}-${groupUniqueString}'
 var workspaceName = format('{0}ahds', replace(name, '-', ''))
 var fhirName = 'fhirdata'
 var storageAccountName = format('{0}sa', replace(name, '-', ''))
@@ -31,7 +32,7 @@ module fhir './fhir.bicep' = {
     tenantId: tenantId
     fhirContributorObjectIds: [
       function.outputs.functionAppPrincipalId
-      privateServicePrincipal.objectId
+      privateServicePrincipal.enterpriseObjectId
     ]
     appTags: appTags
   }

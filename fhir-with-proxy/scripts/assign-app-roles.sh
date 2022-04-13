@@ -40,9 +40,9 @@ function grantAppRole()
         --body "{\"principalId\": \"$2\", \"resourceId\": \"$1\", \"appRoleId\": \"$3\"}"
 }
 
-FUNCTION_SP_OBJECT_ID=`echo $FUNCTION_SP | jq -r '.objectId'`
+FUNCTION_SP_OBJECT_ID=`echo $FUNCTION_SP | jq -r '.enterpriseObjectId'`
 FUNCTION_SP_APP_ID=`echo $FUNCTION_SP | jq -r '.appId'`
-PUBLIC_SP_OBJECT_ID=`echo $PUBLIC_SP | jq -r '.objectId'`
+PUBLIC_SP_OBJECT_ID=`echo $PUBLIC_SP | jq -r '.enterpriseObjectId'`
 PUBLIC_SP_APP_ID=`echo $PUBLIC_SP | jq -r '.appId'`
 
 mkdir -p "${REPO_DIR}/tmp" >/dev/null 2>&1

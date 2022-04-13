@@ -191,7 +191,6 @@ resource symbolicname 'Microsoft.Web/sites/config@2021-03-01' = {
         }
         validation: {
           allowedAudiences: [
-            'https://${functionApp.properties.defaultHostName}'
             functionServicePrincipal.appId
           ]
         }
